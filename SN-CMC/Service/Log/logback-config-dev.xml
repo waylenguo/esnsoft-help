@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--开发环境参考配置-->
+<configuration>
+
+	<!--控制台输出-->
+	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>logbk|%d|%level|%logger{0}|%msg%n</pattern>
+		</encoder>
+	</appender>
+	<!--日志文件输出-->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>busilogger.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      		<!-- daily rollover -->
+			<fileNamePattern>busilogger.%d{yyyy-MM-dd HH-mm}.log</fileNamePattern>
+
+      		<!-- keep 30 days' worth of history capped at 3GB total size -->
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>5GB</totalSizeCap>
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%d|%logger|%msg%n</pattern>
+		</encoder>
+
+		<filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+			<evaluator class="ch.qos.logback.classic.boolex.GEventEvaluator">
+				<expression><![CDATA[
+					e.loggerName.equals("snsoft.busilogger") || 
+					e.loggerName.equals("snsoft.xjs.Menu") || 
+					e.loggerName.equals("snsoft.xjs.button")
+				]]></expression>
+			</evaluator>
+			<OnMismatch>DENY</OnMismatch>
+			<OnMatch>ACCEPT</OnMatch>
+		</filter>
+	</appender>
+	<!--Kafka输出，后面接ELK(SLA)-->
+	<appender name="Kafka" class="snsoft.dx.mdb.logging.KafkaAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+	<!--MongoDB输出-->	
+	<appender name="Mongo" class="snsoft.dx.mdb.logging.LogbackAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<!--屏蔽 MongoCustomConversions警告 2021-4-20-->
+	<logger name="org.springframework.data.convert.CustomConversions">
+		<level value="ERROR" />
+	</logger>
+
+	<!-- 三方日志级别设置 -->	
+	<logger name="ch">
+		<level value="WARN" />
+	</logger>
+	<logger name="io">
+		<level value="WARN" />
+	</logger>
+	<logger name="reactor">
+		<level value="WARN" />
+	</logger>
+	<logger name="org">
+		<level value="WARN" />
+	</logger>
+	<logger name="com">
+		<level value="WARN" />
+	</logger>
+	<logger name="freemarker">
+		<level value="WARN" />
+	</logger>	
+	
+	<!-- N9B日志级别设置 -->	
+	<logger name="snsoft">
+		<level value="DEBUG" />
+	</logger>
+	
+	<!-- 默认日志级别设置 -->
+	<root>
+		<level value="DEBUG" />
+		<appender-ref ref="Console" />
+<!-- 	<appender-ref ref="FILE" /> -->
+<!--	<appender-ref ref="Mongo" /> --> 
+<!-- 	<appender-ref ref="Kafka" /> -->	
+	</root>
+</configuration>
